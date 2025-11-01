@@ -6,5 +6,5 @@ from django.core.cache import cache
 
 @receiver([post_delete, post_save], sender=Property)
 def update_cache(sender, instance, **kwargs):
-    cache.delete("allproperties")
+    cache.delete("all_properties")
 

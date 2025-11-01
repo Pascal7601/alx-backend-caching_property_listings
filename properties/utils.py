@@ -3,7 +3,7 @@ from .models import Property
 from django_redis import get_redis_connection
 import logging
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 def get_all_properties():
     all_properties = cache.get("allproperties")
@@ -19,7 +19,7 @@ def get_redis_cache_metrics():
     hit/miss metrics and calculates the hit ratio.
     
     Returns:
-        A dictionary with hits, misses, total, and hit_ratio.
+        A dictionary with hits, misses, total_requests, and hit_ratio.
     """
     try:
         client = get_redis_connection("default")
@@ -29,32 +29,33 @@ def get_redis_cache_metrics():
       
         hits = info.get('keyspace_hits', 0)
         misses = info.get('keyspace_misses', 0)
-        total = hits + misses
+        total_requests = hits + misses
 
         hit_ratio = 0.0  # Default to 0.0
-        if total > 0:
-            hit_ratio = hits / total
-            
+        if total_requests > 0:
+            hit_ratio = hits / total_requests
+        else:
+            total_requests = 0
 
-        log.info(
+        logger.info(
             f"[Cache Metrics] Hits: {hits}, Misses: {misses}, "
-            f"Total: {total}, Hit Ratio: {hit_ratio:.2%}"
+            f"total_requests: {total_requests}, Hit Ratio: {hit_ratio:.2%}"
         )
         
         return {
             "hits": hits,
             "misses": misses,
-            "total": total,
+            "total_requests": total_requests,
             "hit_ratio": hit_ratio,
             "hit_ratio_percent": f"{hit_ratio:.2%}"
         }
 
     except Exception as e:
-        log.error(f"Could not retrieve Redis cache metrics: {e}")
+        logger.error(f"Could not retrieve Redis cache metrics: {e}")
         return {
             "hits": 0,
             "misses": 0,
-            "total": 0,
+            "total_requests": 0,
             "hit_ratio": 0.0,
             "hit_ratio_percent": "0.00%",
             "error": str(e)

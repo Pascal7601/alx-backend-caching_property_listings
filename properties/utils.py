@@ -1,9 +1,9 @@
 from django.core.cache import cache, InvalidCacheBackendError
 from .models import Property
 
-def getallproperties():
-    queryset = cache.get("allproperties")
-    if queryset is None:
+def get_all_properties():
+    all_properties = cache.get("allproperties")
+    if all_properties is None:
         queryset = Property.objects.all()
         cache.set("allproperties", queryset, 3600)
     return queryset
